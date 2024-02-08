@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import { useRouter } from "next/navigation";
-import { userSignIn } from "@/app/apis/apis";
+import { allUsers, userSignIn } from "@/app/apis/apis";
 import { useSignin } from "@/app/context/signin";
 import { toast, Toaster } from "react-hot-toast";
 import NotFound from "@/app/not-found";
@@ -17,6 +17,8 @@ function Signin() {
   const [loading, setLoading] = useState(false)
   const { signinValidity, setSigninValidity, profEmail, setProfEmail, setLogout } = useSignin();
   const [loader, setLoader] = useState(false)
+  const[users,setUsers]=useState([])
+ 
 
   const router = useRouter();
 
@@ -33,6 +35,7 @@ function Signin() {
     const result = await userSignIn(formData);
     const token = result.token
     const email = result.email
+   
 
     if (token !== "Password not matched" && token != undefined && email != undefined) {
       setLoading(false)
@@ -66,8 +69,16 @@ function Signin() {
 
   const checkValidation = (e) => {
     e.preventDefault();
-
-
+    let allEmails=[]
+    users.forEach((u)=>{
+      allEmails.push(u?.email)
+    })
+   
+    if(allEmails.includes(formData?.email)==false){
+      toast.remove();
+      toast.error("email is not registered");
+      return false;
+    }
     if (formData.email == "" || formData.password == "") {
       toast.remove();
       toast.error("please fill all the fields !!!");
@@ -90,6 +101,19 @@ function Signin() {
   useEffect(() => {
 
     require("bootstrap/dist/js/bootstrap.min.js");
+    const fetcher=async()=>{
+      const tempAllUserData= await allUsers()
+      if(tempAllUserData==undefined){
+         
+       toast.remove();
+       toast.error("unexpected error !!! try again leter!!!");
+     
+   }
+   else{
+      setUsers([...tempAllUserData])
+   }
+     }
+     fetcher()
   }, []);
 
 

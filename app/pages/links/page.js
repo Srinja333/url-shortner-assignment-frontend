@@ -9,6 +9,7 @@ import { toast, Toaster } from "react-hot-toast";
 import NotFound from "@/app/not-found";
 import { useSignin } from "@/app/context/signin";
 import Loader from "@/app/components/loader/loader";
+const isUrlValid = require('url-validation');
 
 function Links() {
 
@@ -16,8 +17,8 @@ function Links() {
   const [baseUrl, setBaseUrl] = useState("")
   const [shortId, setShortId] = useState("")
   const router = useRouter();
-  const { signinValidity, setSigninValidity,logout,setLogout} = useSignin();
- 
+  const { signinValidity, setSigninValidity, logout, setLogout } = useSignin();
+  const [loading, setLoading] = useState(false)
 
 
   useEffect(() => {
@@ -27,77 +28,96 @@ function Links() {
 
   const handleShortUrl = async (e) => {
     e.preventDefault();
+    setLoading(true)
     setShowResult(true);
     const data = {
       redirectUrl: baseUrl
     }
     const urlData = await createShortUrl(data)
-    if(urlData==undefined){
+    if (urlData == undefined) {
+      setLoading(false)
       toast.remove();
       toast.error("short url created unsuccessfully !!!");
-    }else{
-    setShortId(urlData?.shortId)
-    toast.remove();
-    toast.success("short url created successfully !!!");
+    } else {
+      setLoading(false)
+      setShortId(urlData?.shortId)
+      toast.remove();
+      toast.success("short url created successfully !!!");
     }
   }
 
-  if(logout){
-    return(
-  <>
-<Loader/>
-  </>
+  if (logout) {
+    return (
+      <>
+        <Loader />
+      </>
     )
-  }else{
-  if (signinValidity==false) {
-    return <NotFound />;
-  } else if(signinValidity==true) {
-  return (
-    <>
-      <Toaster toastOptions={{ duration: 4000 }} />
-     <Nav/>
-    
-      <div className="container mt-5">
-        <div className="row justify-content-center">
-          <div className="col-md-6">
-            <div className="input-group mb-3">
+  } else {
+    if (signinValidity == false) {
+      return <NotFound />;
+    } else if (signinValidity == true) {
+      return (
+        <>
+          <Toaster toastOptions={{ duration: 4000 }} />
+          <Nav />
 
-              <input type="text" autoComplete="off" className="form-control" placeholder="Give the url" id="searchInput" value={baseUrl} onChange={(e) => {
-                setBaseUrl(e.target.value)
-              }} />
+          <div className="container mt-5">
+            <div className="row justify-content-center">
+              <div className="col-md-6">
+                <div className="input-group mb-3">
+
+                  <input type="text" autoComplete="off" className="form-control" placeholder="Give the url" id="searchInput" value={baseUrl} onChange={(e) => {
+                    setBaseUrl(e.target.value)
+                  }} />
 
 
-              <button className="btn btn-primary" type="button" id="shortUrlButton" onClick={(e) => {
-                handleShortUrl(e)
+                  <button className="btn btn-primary" type="button" id="shortUrlButton" onClick={(e) => {
+                    if (isUrlValid(baseUrl)) {
+                      handleShortUrl(e)
+                    } else {
+                      toast.remove();
+                      toast.error("please provide valid url !!!");
+                    }
 
-              }}>Short url </button>
-            </div>
-          </div>
-        </div>
-      </div>
+                  }}>
 
-      {showResult && baseUrl.length !== 0 &&shortId!==""&&
-        <div className="container mt-3" id="resultDiv">
-          <div className="row justify-content-center">
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-body">
+                    {
+                      loading ?
+                        <div>
+                          Short the url <span className="spinner-grow ms-2" style={{ zoom: "50%" }} role="status">
+                            <span className="sr-only"></span>
+                          </span>
+                        </div> : "Short the url"
+                    }
 
-                  <h5 className="card-title">Result</h5>
-                  <p className="card-text">shorted Url: <span><Link href={`${process.env.NEXT_PUBLIC_API}/url/${shortId}`} style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}>{shortId}</Link></span></p>
-                  <p>Go to Dashboard to see all urls data <span><Link href="/pages/dashboard" style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}>Dashboard</Link></span> </p>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      }
+
+          {showResult && baseUrl.length !== 0 && shortId !== "" &&
+            <div className="container mt-3" id="resultDiv">
+              <div className="row justify-content-center">
+                <div className="col-md-6">
+                  <div className="card">
+                    <div className="card-body">
+
+                      <h5 className="card-title">Result</h5>
+                      <p className="card-text">shorted Url: <span><Link href={`${process.env.NEXT_PUBLIC_API}/url/${shortId}`} style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}>{shortId}</Link></span></p>
+                      <p>Go to Dashboard to see all urls data <span><Link href="/pages/dashboard" style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}>Dashboard</Link></span> </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
 
 
 
 
-    </>
-  )
+        </>
+      )
     }
   }
 }
