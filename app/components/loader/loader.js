@@ -9,11 +9,11 @@ const Loader = () => {
   return (
      <div className="d-flex align-items-center justify-content-center vh-100 bg-white">
       <figure>
-      <div class="dot white"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
+      <div className="dot white"></div>
+      <div className="dot"></div>
+      <div className="dot"></div>
+      <div className="dot"></div>
+      <div className="dot"></div>
       </figure>
     </div>
     
