@@ -39,21 +39,18 @@ function Signin() {
 
     if (token !== "Password not matched" && token != undefined && email != undefined) {
       setLoading(false)
-
-      toast.remove();
-      toast.success("signin successfull !!!");
       var now = new Date();
       var time = now.getTime();
       time += 3600 * 1000;
       now.setTime(time);
       document.cookie =
         "token=" + token + "; expires=" + now.toUTCString() + "; path=/";
-
-
       setLoader(true)
       setSigninValidity(true)
       setLogout(false)
       setProfEmail(email)
+      toast.remove();
+      toast.success("signin successfull !!!");
       router.push("/pages/links")
     }
     else if (token == "Password not matched") {
